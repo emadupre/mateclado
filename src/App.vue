@@ -24,7 +24,7 @@ function onKeydown(e) {
   }
   // dejamos pasar atajos como Ctrl+R (altgr cuenta como Ctrl+Alt, asi que si se tipea)
   if (e.metaKey || (e.ctrlKey && !e.altKey)) return
-  if (e.key.lenght === 1) {
+  if (e.key.length === 1) {
     e.preventDefault()
     test.typeChar(e.key)
   }
@@ -51,8 +51,9 @@ function changeDuration(d) {
       :class="{ active: duration === d }"
       :disabled="status === 'running'"
       @click="changeDuration(d)"
-    />
+    >
     {{ d }}s
+    </button>
   </div>
 
   <p class="stats">
