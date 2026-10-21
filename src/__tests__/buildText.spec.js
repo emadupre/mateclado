@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import { buildText } from '@/utils/buildText'
-import { build } from 'vite'
 
 describe('buildText', () => {
   it('alcanza como mínimo la cantidad de caracteres pedida', () => {
@@ -31,6 +30,6 @@ describe('buildText', () => {
   })
 
   it('lanza un error si no hay frases', () => {
-    expect(() => buildText(100, { phrases: [] })).toThrow()
+    expect(() => buildText(100, { phrases: [] })).toThrow('al menos una frase')
   })
 })

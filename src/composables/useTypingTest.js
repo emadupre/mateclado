@@ -4,6 +4,7 @@ import { calcAccuracy, calcWpm, PENALTY_PER_ERROR, POINTS_PER_WORD } from '@/uti
 
 const BUFFER_MARGIN = 60 // esto nos ayuda, cuando quedan menos de estos caract. agregamos más texto
 const EXTRA_CHARS = 300
+const filled = (length, value) => Array.from({ length }, () => value)
 
 function minCharsFor(duration) {
   return Math.max(220, duration * 14)
@@ -58,8 +59,8 @@ export function useTypingTest({ initialDuration = 30, textSource = buildText } =
     if (currentIndex.value <= text.value.length - BUFFER_MARGIN) return
     const extra = ' ' + textSource(EXTRA_CHARS)
     text.value += extra
-    chars.value.push(...new Array(extra.length).fill('pending'))
-    wordDone.value.push(...new Array(extra.length).fill(false))
+    chars.value.push(...filled(extra.length, 'pending'))
+    wordDone.value.push(...filled(extra.length, false))
   }
 
   // -- palabras selladas -- (esto se llama/activa cuando se tipeo bien el espacio que está en el 'spaceIndex').
@@ -113,8 +114,8 @@ export function useTypingTest({ initialDuration = 30, textSource = buildText } =
     status.value = 'waiting'
     timeLeft.value = duration.value
     text.value = newText
-    chars.value = new Array(newText.length).fill('pending')
-    wordDone.value = new Array(newText.length).fill(false)
+    chars.value = filled(newText.length, 'pending')
+    wordDone.value = filled(newText.length, false)
     currentIndex.value = 0
     lockedUpTo.value = 0
     score.value = 0
