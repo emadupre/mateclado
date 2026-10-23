@@ -16,7 +16,7 @@ export function validateNickname(raw) {
     return `El apodo debe tener al menos ${NICKNAME_MIN} caracteres`
   }
   if (nick.length > NICKNAME_MAX) {
-    return `El apodo puede tener hasta  ${NICKNAME_MAX} caracteres`
+    return `El apodo puede tener hasta ${NICKNAME_MAX} caracteres`
   }
   if (!ALLOWED.test(nick)) {
     return `Usá solo letras, números, espacios, guiones y puntos`

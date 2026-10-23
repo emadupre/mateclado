@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { diffInput } from '@/utils/inputOff'
+import { diffInput } from '@/utils/inputDiff'
 
 describe('diffInput', () => {
   it('detecta un carácter agregado', () => {

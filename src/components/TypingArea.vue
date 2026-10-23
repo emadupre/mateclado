@@ -1,5 +1,5 @@
 <script setup>
-import { diffInput } from '@/utils/inputOff'
+import { diffInput } from '@/utils/inputDiff'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 
 const props = defineProps({
