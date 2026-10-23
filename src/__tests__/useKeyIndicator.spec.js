@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { keyLabel, userKeyIndicator } from '@/composables/useKeyIndicator'
+import { keyLabel, useKeyIndicator } from '@/composables/useKeyIndicator'
 
 describe('keyLabel', () => {
   it('muestra las laetras en mayúscula', () => {
@@ -27,7 +27,7 @@ describe('useKeyIndicator', () => {
   })
 
   it('se activa al presionar y se apaga solo, conservando la última tecla', () => {
-    const k = userKeyIndicator()
+    const k = useKeyIndicator()
     k.press('h')
     expect(k.label.value).toBe('H')
     expect(k.active.value).toBe(true)
@@ -38,7 +38,7 @@ describe('useKeyIndicator', () => {
   })
 
   it('una pulsación nueva reinicia la ventana de activación', () => {
-    const k = userKeyIndicator()
+    const k = useKeyIndicator()
     k.press('h')
     vi.advanceTimersByTime(150)
     k.press('o')
@@ -50,7 +50,7 @@ describe('useKeyIndicator', () => {
   })
 
   it('clear lo deja vacio', () => {
-    const k = userKeyIndicator()
+    const k = useKeyIndicator()
     k.press('h')
     k.clear()
     expect(k.label.value).toBe('')

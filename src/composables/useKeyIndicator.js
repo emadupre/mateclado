@@ -6,7 +6,7 @@ export function keyLabel(key) {
   return key.length === 1 ? key.toUpperCase() : key
 }
 
-export function userKeyIndicator(pulseMs = 220) {
+export function useKeyIndicator(pulseMs = 220) {
   const label = ref('')
   const active = ref(false)
   let timer = null

@@ -1,22 +1,34 @@
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import AppHeader from '@/components/AppHeader.vue'
 import DurationPicker from '@/components/DurationPicker.vue'
 import KeyIndicator from '@/components/KeyIndicator.vue'
 import RestartButton from '@/components/RestartButton.vue'
 import ResultsScreen from '@/components/ResultsScreen.vue'
+import ScoreSubmit from '@/components/ScoreSubmit.vue'
 import StatsBar from '@/components/StatsBar.vue'
 import TypingArea from '@/components/TypingArea.vue'
-import { userKeyIndicator } from '@/composables/useKeyIndicator'
+import { useKeyIndicator } from '@/composables/useKeyIndicator'
+import { useScoreSubmission } from '@/composables/useScoreSubmission'
 import { useTypingTest } from '@/composables/useTypingTest'
+import { DEFAULT_DURATION, DURATIONS } from '@/data/durations'
+import { useProfileStore } from '@/stores/profile'
+import { normalizeNickname } from '@/utils/nickname'
 
-const DURATIONS = [15, 30, 60, 120]
-
-const test = useTypingTest()
+const test = useTypingTest({ initialDuration: DEFAULT_DURATION })
 const { text, chars, wordDone, currentIndex, status, timeLeft, duration, score, wpm, accuracy } =
   test
 
-const keyIndicator = userKeyIndicator()
+const keyIndicator = useKeyIndicator()
 const { label: lastKey, active: lastKeyActive } = keyIndicator
+
+const profile = useProfileStore()
+const nickname = ref(profile.nickname)
+const submission = useScoreSubmission()
+const { status: saveStatus, error: saveError } = submission
+
+// si el jugador corrige el apodo después de un error, sacamos el mensaje
+watch(nickname, () => submission.clearError())
 
 const area = ref(null)
 
@@ -28,7 +40,7 @@ function onBackspace() {
   if (test.backspace()) keyIndicator.press('Backspace')
 }
 
-//esperamos el proximo render porque typingarea puede estar montandose de nuevo
+// esperamos al próximo render porque TypingArea puede estar montándose de nuevo
 async function focusArea() {
   await nextTick()
   area.value?.focus()
@@ -37,22 +49,39 @@ async function focusArea() {
 function restart() {
   test.reset()
   keyIndicator.clear()
+  submission.reset()
   focusArea()
 }
 
 function changeDuration(seconds) {
   test.setDuration(seconds)
   keyIndicator.clear()
+  submission.reset()
   focusArea()
 }
 
-// en la pantalla de resultados no hay nada enfocado, así que escuchamos toda la ventana.
-// (a proposito no enfocamos el botón: una tecla pendiente podría reiniciar sin querer)
+async function saveResult() {
+  const saved = await submission.submit({
+    nickname: nickname.value,
+    wpm: wpm.value,
+    accuracy: accuracy.value,
+    score: score.value,
+    duration: duration.value,
+  })
+  if (saved) profile.setNickName(normalizeNickname(nickname.value))
+}
+
+function isTypingInField(target) {
+  return target instanceof HTMLElement && target.closest('input, textarea, select') !== null
+}
+
+// en la pantalla de resultados no hay nada enfocado, así que escuchamos en toda la ventana.
+// Tab no se toca (hace falta para navegar el formulario) y Esc se ignora dentro de un campo.
 function onWindowKeydown(e) {
-  if (status.value === 'finished' && (e.key === 'Tab' || e.key === 'Escape')) {
-    e.preventDefault()
-    restart()
-  }
+  if (status.value !== 'finished' || e.key !== 'Escape') return
+  if (isTypingInField(e.target)) return
+  e.preventDefault()
+  restart()
 }
 
 onMounted(() => window.addEventListener('keydown', onWindowKeydown))
@@ -61,15 +90,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onWindowKeydown))
 
 <template>
   <main class="home">
-    <header class="topbar">
-      <h1 class="logo">mate<span>clado</span></h1>
+    <h1 class="sr-only">mateclado, test de velocidad de tipeo en español argentino</h1>
+
+    <AppHeader>
+      <RouterLink to="/ranking" class="text-link">ranking</RouterLink>
       <DurationPicker
         :options="DURATIONS"
         :value="duration"
         :disabled="status === 'running'"
         @select="changeDuration"
       />
-    </header>
+    </AppHeader>
 
     <template v-if="status !== 'finished'">
       <div class="stat-row">
@@ -89,14 +120,27 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onWindowKeydown))
       />
     </template>
 
-    <ResultsScreen v-else :wpm="wpm" :accuracy="accuracy" :score="score" :duration="duration" />
+    <template v-else>
+      <ResultsScreen :wpm="wpm" :accuracy="accuracy" :score="score" :duration="duration" />
+      <ScoreSubmit
+        v-if="wpm > 0"
+        v-model="nickname"
+        :status="saveStatus"
+        :error="saveError"
+        :duration="duration"
+        @submit="saveResult"
+      />
+    </template>
 
     <div class="restart-row">
-      <RestartButton :label="status === 'finished' ? 'probar de nuevo' : 'reiniciar'" />
+      <RestartButton
+        :label="status === 'finished' ? 'probar de nuevo' : 'reiniciar'"
+        @click="restart"
+      />
     </div>
 
     <p class="footer-note">
-      <template v-if="status === 'finished'"><kbd>tab</kbd> para arrancar de nuevo</template>
+      <template v-if="status === 'finished'"><kbd>esc</kbd> para arrancar de nuevo</template>
       <template v-else>
         <kbd>tab</kbd> o <kbd>esc</kbd> reinicia con un texto nuevo · <kbd>⌫</kbd> corrige lo que
         escribiste
@@ -106,28 +150,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onWindowKeydown))
 </template>
 
 <style scoped>
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
-}
-.logo {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--accent);
-}
-
-.logo span {
-  color: var(--text-dim);
-  font-weight: 400;
-}
-
 .stat-row {
   display: flex;
   align-items: center;
@@ -150,7 +172,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onWindowKeydown))
   text-align: center;
   color: var(--text-faint);
 }
-
 .footer-note kbd {
   font-family: var(--font-mono);
   background: var(--surface);
@@ -159,7 +180,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onWindowKeydown))
   color: var(--text-dim);
 }
 
-/* en celular no hay tecla Tab ni Esc*/
+/* en celular no hay tecla Tab ni Esc */
 @media (pointer: coarse) {
   .footer-note {
     display: none;
