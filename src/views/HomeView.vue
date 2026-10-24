@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AppHeader from '@/components/AppHeader.vue'
 import DurationPicker from '@/components/DurationPicker.vue'
 import KeyIndicator from '@/components/KeyIndicator.vue'
@@ -14,11 +14,18 @@ import { useTypingTest } from '@/composables/useTypingTest'
 import { DEFAULT_DURATION, DURATIONS } from '@/data/durations'
 import { useProfileStore } from '@/stores/profile'
 import { normalizeNickname } from '@/utils/nickname'
+import LearnedWords from '@/components/LearnedWords.vue'
+import { GLOSARIO } from '@/data/glosario'
+import { findWords, publishableEntries } from '@/utils/glosario'
 
 const test = useTypingTest({ initialDuration: DEFAULT_DURATION })
 const { text, chars, wordDone, currentIndex, status, timeLeft, duration, score, wpm, accuracy } =
   test
 
+const playable = publishableEntries(GLOSARIO)
+const learned = computed(() =>
+  status.value === 'finished' ? findWords(text.value, currentIndex.value, playable) : [],
+)
 const keyIndicator = useKeyIndicator()
 const { label: lastKey, active: lastKeyActive } = keyIndicator
 
@@ -71,15 +78,15 @@ async function saveResult() {
   if (saved) profile.setNickName(normalizeNickname(nickname.value))
 }
 
-function isTypingInField(target) {
-  return target instanceof HTMLElement && target.closest('input, textarea, select') !== null
+function isInsideFieldOrDialog(target) {
+  return target instanceof HTMLElement && target.closest('input, textarea, select, dialog') !== null
 }
 
 // en la pantalla de resultados no hay nada enfocado, así que escuchamos en toda la ventana.
 // Tab no se toca (hace falta para navegar el formulario) y Esc se ignora dentro de un campo.
 function onWindowKeydown(e) {
   if (status.value !== 'finished' || e.key !== 'Escape') return
-  if (isTypingInField(e.target)) return
+  if (isInsideFieldOrDialog(e.target)) return
   e.preventDefault()
   restart()
 }
@@ -122,6 +129,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onWindowKeydown))
 
     <template v-else>
       <ResultsScreen :wpm="wpm" :accuracy="accuracy" :score="score" :duration="duration" />
+      <LearnedWords v-if="learned.length" :entries="learned" />
       <ScoreSubmit
         v-if="wpm > 0"
         v-model="nickname"

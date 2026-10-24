@@ -17,4 +17,9 @@ describe('banco de frases', () => {
       expect(frase).not.toMatch(/\n/)
     }
   })
+
+  it('solo usa caracteres que se pueden tipear en un teclado común', () => {
+    const raras = FRASES.filter((frase) => !/^[\p{L}\p{N} ,.;:¿?¡!'"()-]+$/u.test(frase))
+    expect(raras).toEqual([])
+  })
 })

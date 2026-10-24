@@ -76,7 +76,7 @@ function select(seconds) {
 </template>
 
 <style scoped>
-.title{
+.title {
   margin: 0 0 var(--space-4);
   font-family: var(--font-mono);
   font-size: 18px;
@@ -84,12 +84,12 @@ function select(seconds) {
   color: var(--text);
 }
 
-.state{
+.state {
   font-family: var(--font-mono);
   font-size: 14px;
   color: var(--text-dim);
 }
-.retry{
+.retry {
   min-height: 44px;
   padding: 0 var(--space-3);
   font-family: var(--font-mono);
@@ -99,16 +99,16 @@ function select(seconds) {
   border-radius: var(--radius-md);
   cursor: pointer;
 }
-.table-wrap{
+.table-wrap {
   overflow-x: auto;
 }
-.board{
+.board {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-mono);
   font-size: 15px;
 }
-.board th{
+.board th {
   padding: 0 var(--space-2) var(--space-2);
   font-size: 12px;
   font-weight: 400;
@@ -116,30 +116,30 @@ function select(seconds) {
   color: var(--text-dim);
   border-bottom: 1px solid var(--surface);
 }
-.board td{
+.board td {
   padding: 10px var(--space-2);
   border-bottom: 1px solid var(--surface);
 }
-.board .num{
+.board .num {
   text-align: right;
 }
-.pos{
+.pos {
   width: 2.5em;
   color: var(--text-dim);
 }
-.pos.first{
+.pos.first {
   font-weight: 700;
   color: var(--accent);
 }
-.nick{
-  overflow-wrap: anywhere; 
+.nick {
+  overflow-wrap: anywhere;
 }
-.strong{
+.strong {
   font-weight: 700;
   color: var(--accent);
 }
 
-.back{
+.back {
   display: inline-block;
   margin-top: var(--space-5);
 }

@@ -52,7 +52,10 @@ describe('useRanking', () => {
   it('ignora la respuesta de una duración anterior que llega tarde', async () => {
     const first = deferred()
     const second = deferred()
-    const fetcher = vi.fn().mockRejectedValueOnce(first.promise).mockResolvedValueOnce(second.promise)
+    const fetcher = vi
+      .fn()
+      .mockRejectedValueOnce(first.promise)
+      .mockResolvedValueOnce(second.promise)
     const duration = ref(30)
     const r = useRanking(duration, fetcher)
 

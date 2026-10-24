@@ -1,6 +1,6 @@
-import { createPinia, setActivePinia } from "pinia";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useProfileStore } from "@/stores/profile";
+import { createPinia, setActivePinia } from 'pinia'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useProfileStore } from '@/stores/profile'
 
 describe('profile store', () => {
   beforeEach(() => {
