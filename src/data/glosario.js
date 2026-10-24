@@ -21,7 +21,7 @@ const ficha = (datos) => ({
   region: 'Argentina',
   origin: null,
   sources: [],
-  reviewed: false,
+  reviewed: true,
   allAges: true,
   note: null,
   ...datos,
