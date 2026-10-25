@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { CATEGORIES } from '@/data/glosario'
-import { exampleFor } from '@/utils/glosario'
+import WordCard from './WordCard.vue'
 
 const props = defineProps({
   entries: { type: Array, required: true },
@@ -13,11 +12,6 @@ const lead = computed(() =>
   props.entries.length === 1
     ? 'En esta partida apareció 1 palabra del habla argentina.'
     : `En esta partida aparecieron ${props.entries.length} palabras del habla argentina`,
-)
-
-//la frase del juego donde apareció la palabra sirve de ejemplo
-const cards = computed(() =>
-  props.entries.map((entry) => ({ ...entry, example: exampleFor(entry) })),
 )
 
 function open() {
@@ -48,19 +42,8 @@ function onDialogClick(event) {
         </header>
 
         <ul class="list">
-          <li v-for="card in cards" :key="card.id" class="card">
-            <h3 class="term">{{ card.term }}</h3>
-            <p class="tags">{{ CATEGORIES[card.category] }} · {{ card.region }}</p>
-            <p class="meaning">{{ card.meaning }}</p>
-            <p v-if="card.example" class="example">{{ card.example }}</p>
-            <p class="origin">
-              <strong>Origen:</strong>
-              {{ card.origin ?? 'Todavía no está documentado.' }}
-            </p>
-            <p v-if="card.sources.length" class="origin">
-              <strong>Fuentes:</strong> {{ card.sources.join('; ') }}
-            </p>
-            <p v-if="!card.reviewed" class="draft">Ficha en revisión</p>
+          <li v-for="entry in entries" :key="entry.id">
+            <WordCard :entry="entry" />
           </li>
         </ul>
       </div>
@@ -146,44 +129,5 @@ function onDialogClick(event) {
   margin: 0;
   padding: 0;
   list-style: none;
-}
-.card {
-  padding: var(--space-3) 0;
-  border-top: 1px solid var(--surface-2);
-}
-.term {
-  margin: 0 0 var(--space-1);
-  font-size: 17px;
-  color: var(--accent);
-}
-.tags {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-dim);
-}
-.meaning {
-  margin: 0 0 var(--space-2);
-  font-size: 15px;
-  line-height: 1.5;
-}
-.example {
-  margin: 0 0 var(--space-2);
-  font-size: 13px;
-  font-style: italic;
-  line-height: 1.5;
-  color: var(--text-dim);
-}
-.origin {
-  margin: 0 0 var(--space-1);
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--text-dim);
-}
-.draft {
-  margin: var(--space-2) 0 0;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--accent-dim);
 }
 </style>

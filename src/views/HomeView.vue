@@ -100,7 +100,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onWindowKeydown))
     <h1 class="sr-only">mateclado, test de velocidad de tipeo en español argentino</h1>
 
     <AppHeader>
-      <RouterLink to="/ranking" class="text-link">ranking</RouterLink>
       <DurationPicker
         :options="DURATIONS"
         :value="duration"

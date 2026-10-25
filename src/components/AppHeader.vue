@@ -4,6 +4,10 @@
       >mate<span>clado</span></RouterLink
     >
     <div class="actions">
+      <nav class="nav" aria-label="Secciones">
+        <RouterLink to="/ranking" class="text-link">ranking</RouterLink>
+        <RouterLink to="/diccionario" class="text-link">diccionario</RouterLink>
+      </nav>
       <slot />
     </div>
   </header>
@@ -35,5 +39,12 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+.nav {
+  display: flex;
+  gap: var(--space-3);
+}
+.nav a.router-link-active {
+  color: var(--accent);
 }
 </style>

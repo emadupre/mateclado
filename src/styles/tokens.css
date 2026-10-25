@@ -1,4 +1,6 @@
 :root {
+  color-scheme: dark;
+
   /* colores base */
   --bg: #16241b;
   --surface: #1e3125;

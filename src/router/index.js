@@ -15,6 +15,11 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       redirect: { name: 'home' },
     },
+    {
+      path: '/diccionario',
+      name: 'dictonary',
+      component: () => import('../views/DictionaryView.vue'),
+    },
   ],
 })
 
