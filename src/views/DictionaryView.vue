@@ -66,6 +66,11 @@ function clearFilters() {
       Palabras y expresiones del habla Argentina. Cada ficha cuenta qué significa y, cuando se sabe,
       de dónde viene.
     </p>
+    <p class="contribute-link">
+      <RouterLink to="/aportar" class="text-link"
+        >¿Falta alguna palabra de tu zona? Aportá la tuya →</RouterLink
+      >
+    </p>
 
     <form class="filters" role="search" @submit.prevent>
       <div class="field grow">
@@ -127,6 +132,9 @@ function clearFilters() {
   line-height: 1.5;
   color: var(--text-dim);
 }
+.contribute-link {
+  margin: 0 0 var(--space-4);
+}
 
 .filters {
   display: flex;
@@ -168,7 +176,7 @@ input::placeholder {
 }
 
 .count {
-  margin: 0 0 var(--sapce-2);
+  margin: 0 0 var(--space-2);
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-dim);

@@ -20,6 +20,11 @@ const router = createRouter({
       name: 'dictonary',
       component: () => import('../views/DictionaryView.vue'),
     },
+    {
+      path: '/aportar',
+      name: 'contribute',
+      component: () => import('../views/ContributeView.vue'),
+    },
   ],
 })
 

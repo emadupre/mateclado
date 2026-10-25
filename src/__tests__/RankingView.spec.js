@@ -18,6 +18,7 @@ async function mountAt(path) {
       { path: '/', component: { render: () => null } },
       { path: '/ranking', name: 'ranking', component: RankingView },
       { path: '/diccionario', component: { render: () => null } },
+      { path: '/aportar', component: { render: () => null } },
     ],
   })
   router.push(path)

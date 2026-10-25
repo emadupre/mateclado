@@ -7,6 +7,7 @@
       <nav class="nav" aria-label="Secciones">
         <RouterLink to="/ranking" class="text-link">ranking</RouterLink>
         <RouterLink to="/diccionario" class="text-link">diccionario</RouterLink>
+        <RouterLink to="/aportar" class="text-link">aportar</RouterLink>
       </nav>
       <slot />
     </div>
