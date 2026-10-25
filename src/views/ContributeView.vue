@@ -50,12 +50,6 @@ function another() {
   Object.assign(form, blank())
   errors.value = {}
 }
-
-if (import.meta.env.DEV) {
-  import('../services/supabase').then((c) => {
-    window.sb = c.getSupabase()
-  })
-}
 </script>
 
 <template>
