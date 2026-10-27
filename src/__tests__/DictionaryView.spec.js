@@ -1,7 +1,11 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { describe, expect, it, vi } from 'vitest'
+import { createPinia } from 'pinia'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
+import { fetchApprovedContributions } from '@/services/contributions'
 import DictionaryView from '@/views/DictionaryView.vue'
+
+vi.mock('@/services/contributions', () => ({ fetchApprovedContributions: vi.fn() }))
 
 vi.mock('@/data/glosario', () => {
   const base = {
@@ -30,6 +34,17 @@ vi.mock('@/data/glosario', () => {
   }
 })
 
+const approved = {
+  id: 'abc',
+  term: 'Tucumano',
+  region: 'Tucumán',
+  meaning: 'Algo de ejemplo para la prueba.',
+  example: 'El tucumano llegó temprano a la plaza.',
+  origin: null,
+  source: null,
+  contributor: 'Lu',
+}
+
 async function mountAt(path = '/diccionario') {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -43,11 +58,17 @@ async function mountAt(path = '/diccionario') {
   router.push(path)
   await router.isReady()
 
-  const wrapper = mount(DictionaryView, { global: { plugins: [router] } })
+  const wrapper = mount(DictionaryView, { global: { plugins: [router, createPinia()] } })
+  await flushPromises()
   return { wrapper, router }
 }
 
 const terms = (wrapper) => wrapper.findAll('.term').map((node) => node.text())
+
+beforeEach(() => {
+  fetchApprovedContributions.mockReset()
+  fetchApprovedContributions.mockResolvedValue([])
+})
 
 describe('DictionaryView', () => {
   it('lista todas las palabras en orden alfabético', async () => {
@@ -109,5 +130,28 @@ describe('DictionaryView', () => {
   it('ignora filtros inválidos de la URL', async () => {
     const { wrapper } = await mountAt('/diccionario?cat=nada&reg=Marte')
     expect(wrapper.findAll('.word-card')).toHaveLength(3)
+  })
+
+  it('suma las palabras aprobadas de la comunidad y muestra quién las aportó', async () => {
+    fetchApprovedContributions.mockResolvedValue([approved])
+    const { wrapper } = await mountAt()
+
+    expect(terms(wrapper)).toEqual(['Capo', 'Guita', 'Pandito', 'Tucumano'])
+    expect(wrapper.text()).toContain('Aportada por Lu')
+  })
+
+  it('un enlace con un lugar de la comunidad conserva el filtro aunque cargue después', async () => {
+    fetchApprovedContributions.mockResolvedValue([approved])
+    const { wrapper } = await mountAt('/diccionario?reg=Tucumán')
+
+    expect(terms(wrapper)).toEqual(['Tucumano'])
+  })
+
+  it('avisa si no se pudieron cargar las palabras de la comunidad y muestra el resto', async () => {
+    fetchApprovedContributions.mockRejectedValue(new Error('sin conexión'))
+    const { wrapper } = await mountAt()
+
+    expect(wrapper.text()).toContain('No pudimos cargar las palabras de la comunidad')
+    expect(terms(wrapper)).toEqual(['Capo', 'Guita', 'Pandito'])
   })
 })

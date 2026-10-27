@@ -46,6 +46,8 @@ export function findWords(text, upTo, entries) {
 
 /** la primera frase del juego donde aparece la palabra, o null. */
 export function exampleFor(entry, phrases = FRASES) {
+  if (entry.example) return entry.example
+  
   const forms = entry.forms.map(normalizeText)
   const found = phrases.find((phrase) => {
     const haystack = normalizeText(phrase)

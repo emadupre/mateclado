@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import WordCard from '@/components/WordCard.vue'
 import { CATEGORIES, GLOSARIO } from '@/data/glosario'
+import { REGION_OPTIONS } from '@/data/regions'
+import { useCommunityStore } from '@/stores/community'
 import {
   filterEntries,
   filtersToQuery,
@@ -17,14 +19,23 @@ import { publishableEntries } from '@/utils/glosario'
 const route = useRoute()
 const router = useRouter()
 
-const entries = sortEntries(publishableEntries(GLOSARIO))
-const regions = regionOptions(entries)
+const community = useCommunityStore()
+community.ensureLoaded()
+
+const baseEntries = publishableEntries(GLOSARIO)
+const entries = computed(() => sortEntries([...baseEntries, ...community.entries]))
+const regions = computed(() => regionOptions(entries.value))
 // solo los tipos que tienen al menos una palabra
-const categories = Object.keys(CATEGORIES).filter((key) =>
-  entries.some((entry) => entry.category === key),
+const categories = computed(() =>
+  Object.keys(CATEGORIES).filter((key) => entries.value.some((entry) => entry.category === key)),
 )
 
-const initial = readFilters(route.query, { categories, regions })
+const possible = {
+  categories: Object.keys(CATEGORIES),
+  regions: regionOptions(REGION_OPTIONS.map(({ value }) => ({ region: value }))),
+}
+
+const initial = readFilters(route.query, possible)
 const query = ref(initial.query)
 const category = ref(initial.category)
 const region = ref(initial.region)
@@ -41,7 +52,7 @@ watch([query, category, region], () => {
 })
 
 const results = computed(() =>
-  filterEntries(entries, {
+  filterEntries(entries.value, {
     query: query.value,
     category: category.value,
     region: region.value,
@@ -102,6 +113,12 @@ function clearFilters() {
     </form>
 
     <p class="count" role="status">{{ results.length }} de {{ entries.length }} palabras</p>
+    <p v-if="community.status === 'loading'" class="note" role="status">
+      Cargando palabras de la comunidad..
+    </p>
+    <p v-if="community.status === 'error'" class="note" role="status">
+      No pudimos cargar las palabras de la comunidad.
+    </p>
 
     <ul v-if="results.length" class="list">
       <li v-for="entry in results" :key="entry.id">
@@ -119,6 +136,12 @@ function clearFilters() {
 </template>
 
 <style scoped>
+.note {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
 .title {
   margin: 0 0 var(--space-2);
   font-family: var(--font-mono);

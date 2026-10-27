@@ -17,14 +17,32 @@ import { normalizeNickname } from '@/utils/nickname'
 import LearnedWords from '@/components/LearnedWords.vue'
 import { GLOSARIO } from '@/data/glosario'
 import { findWords, publishableEntries } from '@/utils/glosario'
+import { FRASES } from '@/data/frases'
+import { useCommunityStore } from '@/stores/community'
+import { buildText } from '@/utils/buildText'
 
-const test = useTypingTest({ initialDuration: DEFAULT_DURATION })
+const community = useCommunityStore()
+community.ensureLoaded()
+const test = useTypingTest({
+  initialDuration: DEFAULT_DURATION,
+  textSource: (minChars) => buildText(minChars, { phrases: [...FRASES, ...community.phrases] }),
+})
+
 const { text, chars, wordDone, currentIndex, status, timeLeft, duration, score, wpm, accuracy } =
   test
 
+watch(
+  () => community.phrases.length,
+  () => {
+    if (status.value === 'waiting') test.reset()
+  },
+)
+
 const playable = publishableEntries(GLOSARIO)
 const learned = computed(() =>
-  status.value === 'finished' ? findWords(text.value, currentIndex.value, playable) : [],
+  status.value === 'finished'
+    ? findWords(text.value, currentIndex.value, [...playable, ...community.entries])
+    : [],
 )
 const keyIndicator = useKeyIndicator()
 const { label: lastKey, active: lastKeyActive } = keyIndicator

@@ -16,7 +16,22 @@ export function createContributionsService(getClient = getSupabase) {
     }
   }
 
-  return { saveContribution }
+  async function fetchApproved(limit = 50) {
+    const { data, error } = await getClient()
+      .from('contributions')
+      .select('id,term,region,meaning,example,origin,source,contributor')
+      .eq('status', 'approved')
+      .order('term')
+      .limit(limit)
+    if (error) {
+      console.error('Error al cargar las palabras aportadas: ', Error)
+      throw new Error('No se pudieron cargar las palabras de la comunidad.')
+    }
+    return data ?? []
+  }
+
+  return { saveContribution, fetchApproved }
 }
 
-export const { saveContribution } = createContributionsService()
+export const { saveContribution, fetchApproved: fetchApprovedContributions } =
+  createContributionsService()

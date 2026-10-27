@@ -2,13 +2,27 @@ import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
+import { fetchApprovedContributions } from '@/services/contributions'
 import { saveScore } from '@/services/scores'
+import { buildText } from '@/utils/buildText'
 import HomeView from '@/views/HomeView.vue'
 
 vi.mock('@/services/scores', () => ({ saveScore: vi.fn() }))
+vi.mock('@/services/contributions', () => ({ fetchApprovedContributions: vi.fn() }))
 vi.mock('@/utils/buildText', () => ({
-  buildText: () => 'hola mundo '.repeat(40).trim(),
+  buildText: vi.fn(() => 'hola mundo '.repeat(40).trim()),
 }))
+
+const approvedRow = {
+  id: 'abc-123',
+  term: 'Pandito',
+  region: 'San Luis',
+  meaning: 'Lugar poco profundo.',
+  example: 'Los chicos jugaban en el pandito del arroyo.',
+  origin: null,
+  source: null,
+  contributor: 'Lu',
+}
 
 function mountHome() {
   return mount(HomeView, {
@@ -32,6 +46,9 @@ describe('HomeView', () => {
     localStorage.clear()
     saveScore.mockReset()
     saveScore.mockResolvedValue(undefined)
+    fetchApprovedContributions.mockReset()
+    fetchApprovedContributions.mockResolvedValue([])
+    buildText.mockClear()
   })
 
   afterEach(() => {
@@ -161,6 +178,34 @@ describe('HomeView', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
     await nextTick()
     expect(wrapper.find('.results').exists()).toBe(false) // volvió a jugar
+    wrapper.unmount()
+  })
+
+  it('suma las frases aprobadas por la comunidad al banco del juego', async () => {
+    fetchApprovedContributions.mockResolvedValue([approvedRow])
+    const wrapper = mountHome()
+    await flushPromises()
+
+    const [, options] = buildText.mock.calls.at(-1)
+    expect(options.phrases).toContain(approvedRow.example)
+    wrapper.unmount()
+  })
+
+  it('no renueva el texto si ya empezaste a tipear cuando llegan las frases', async () => {
+    let deliver
+    fetchApprovedContributions.mockReturnValue(
+      new Promise((resolve) => {
+        deliver = resolve
+      }),
+    )
+    const wrapper = mountHome()
+    await wrapper.find('.type-zone').trigger('keydown', { key: 'h' })
+    const callsBefore = buildText.mock.calls.length
+
+    deliver([approvedRow])
+    await flushPromises()
+
+    expect(buildText.mock.calls.length).toBe(callsBefore)
     wrapper.unmount()
   })
 })
