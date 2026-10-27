@@ -11,6 +11,22 @@ export default defineConfig([
     name: 'app/files-to-lint',
     files: ['**/*.{vue,js,mjs,jsx}'],
   },
+  {
+    name: 'app/node-globals',
+    files: [
+      'vite.config.js',
+      'vite.config.*',
+      'eslint.config.js',
+      'postcss.confing.js',
+      'tailwind.config.js',
+      'src/**/__tests__/**',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
 
   globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
 
