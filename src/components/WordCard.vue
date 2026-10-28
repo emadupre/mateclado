@@ -27,7 +27,7 @@ const heading = computed(() => `h${props.headingLevel}`)
       <strong>Fuentes:</strong> {{ entry.sources.join('; ') }}
     </p>
     <p v-if="!entry.reviewed" class="draft">Ficha en revisión</p>
-    <p v-if="entry.contributor" class="origin">Aportada por {{  entry.contributor }}</p>
+    <p v-if="entry.contributor" class="origin">Aportada por {{ entry.contributor }}</p>
   </article>
 </template>
 

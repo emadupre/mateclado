@@ -23,6 +23,14 @@
   --error-dim: #4a2620;
   --error-glow: rgba(194, 93, 78, 0.65);
 
+  /* podio del ranking */
+  --medal-gold: var(--accent);
+  --medal-gold-soft: rgba(212, 165, 55, 0.1);
+  --medal-silver: #bcc4cc;
+  --medal-silver-soft: rgba(188, 196, 204, 0.08);
+  --medal-bronze: #c4885a;
+  --medal-bronze-soft: rgba(196, 136, 90, 0.01);
+
   /* tipografia */
   --font-mono: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;

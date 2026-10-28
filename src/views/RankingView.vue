@@ -20,6 +20,9 @@ const { rows, loading, error, reload } = useRanking(duration)
 function select(seconds) {
   router.replace({ query: { d: seconds } })
 }
+
+const PODIUM = ['gold', 'silver', 'bronze']
+const podiumClass = (index) => (index < PODIUM.length ? `podium-${PODIUM[index]}` : '')
 </script>
 
 <template>
@@ -29,6 +32,7 @@ function select(seconds) {
     </AppHeader>
 
     <h1 class="title">ranking · {{ duration }}s</h1>
+    <p class="note">Se muestra la mejor marca de cada participante.</p>
 
     <p v-if="loading" class="state" role="status">cargando...</p>
 
@@ -60,7 +64,7 @@ function select(seconds) {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row, i) in rows" :key="row.id">
+          <tr v-for="(row, i) in rows" :key="row.id" :class="podiumClass(i)">
             <td class="pos" :class="{ first: i === 0 }">{{ i + 1 }}</td>
             <td class="nick">{{ row.nickname }}</td>
             <td class="num strong">{{ row.score }}</td>
@@ -124,19 +128,57 @@ function select(seconds) {
   text-align: right;
 }
 .pos {
-  width: 2.5em;
-  color: var(--text-dim);
+  width: 3em;
 }
-.pos.first {
-  font-weight: 700;
-  color: var(--accent);
-}
+
 .nick {
   overflow-wrap: anywhere;
 }
 .strong {
   font-weight: 700;
   color: var(--accent);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 50%;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.podium-gold .badge {
+  color: var(--bg);
+  background: var(--medal-gold);
+}
+
+.podium-silver .badge {
+  color: var(--bg);
+  background: var(--medal-silver);
+}
+
+.podium-bronze .badge {
+  color: var(--bg);
+  background: var(--medal-bronze);
+}
+
+.board tr.podium-gold td {
+  background: var(--medal-gold-soft);
+}
+
+.board tr.podium-silver td {
+  background: var(--medal-silver-soft);
+}
+
+.board tr.podium-bronze td {
+  background: var(--medal-bronze-soft);
+}
+
+.board tr[class*='podium-'] .nick {
+  font-weight: 700;
 }
 
 .back {
